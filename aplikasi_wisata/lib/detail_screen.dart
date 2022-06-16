@@ -1,19 +1,235 @@
+import 'package:aplikasi_wisata/tourism_place.dart';
 import 'package:flutter/material.dart';
 
 class DetailScreen extends StatelessWidget {
-  const DetailScreen({Key? key}) : super(key: key);
+  const DetailScreen({Key? key, required this.place}) : super(key: key);
+
+  final TourismPlace place;
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      if (constraints.maxWidth > 800) {
+        return DetailWebPage(place: place);
+      } else {
+        return DetailMobilePage(place: place);
+      }
+    });
+  }
+}
+
+class DetailWebPage extends StatefulWidget {
+  DetailWebPage({
+    Key? key,
+    required this.place,
+  }) : super(key: key);
+  final TourismPlace place;
+
+  @override
+  State<DetailWebPage> createState() => _DetailWebPageState();
+}
+
+class _DetailWebPageState extends State<DetailWebPage> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 64,
+        ),
+        child: Center(
+          child: Container(
+            width: 1200,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Wisata Bandung',
+                  style: TextStyle(
+                    fontFamily: 'Oswald',
+                    fontSize: 32,
+                  ),
+                ),
+                SizedBox(height: 32),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          ClipRRect(
+                            child: Image.asset(widget.place.imageAsset),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          SizedBox(height: 16),
+                          Scrollbar(
+                            isAlwaysShown: true,
+                            controller: _scrollController,
+                            child: Container(
+                              height: 150,
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: ListView(
+                                controller: _scrollController,
+                                scrollDirection: Axis.horizontal,
+                                children: widget.place.imageUrls.map((url) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.network(url),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 32),
+                    Expanded(
+                      child: Card(
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Container(
+                                child: Text(
+                                  widget.place.name,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 30.0,
+                                    fontFamily: 'Staatliches',
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: <Widget>[
+                                      Icon(Icons.calendar_today),
+                                      SizedBox(width: 8.0),
+                                      Text(
+                                        widget.place.openDays,
+                                        style: TextStyle(
+                                          fontFamily: 'Oswald',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  FavoriteButton(),
+                                ],
+                              ),
+                              Row(
+                                children: <Widget>[
+                                  Icon(Icons.access_time),
+                                  SizedBox(width: 8.0),
+                                  Text(
+                                    widget.place.openTime,
+                                    style: TextStyle(
+                                      fontFamily: 'Oswald',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8.0),
+                              Row(
+                                children: <Widget>[
+                                  Icon(Icons.monetization_on),
+                                  SizedBox(width: 8.0),
+                                  Text(
+                                    widget.place.ticketPrice,
+                                    style: TextStyle(
+                                      fontFamily: 'Oswald',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(vertical: 16.0),
+                                child: Text(
+                                  widget.place.description,
+                                  textAlign: TextAlign.justify,
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontFamily: 'Oxygen',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DetailMobilePage extends StatelessWidget {
+  const DetailMobilePage({
+    Key? key,
+    required this.place,
+  }) : super(key: key);
+
+  final TourismPlace place;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Stack(
+              children: <Widget>[
+                Image.asset(place.imageAsset),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.grey,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                        FavoriteButton(),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
             Container(
               margin: EdgeInsets.only(top: 16.0),
               child: Text(
-                'Farm House Lembang',
+                place.name,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 30.0,
@@ -30,21 +246,36 @@ class DetailScreen extends StatelessWidget {
                     children: <Widget>[
                       Icon(Icons.calendar_today),
                       SizedBox(height: 8.0),
-                      Text('Open Everyday'),
+                      Text(
+                        place.openDays,
+                        style: TextStyle(
+                          fontFamily: 'Oswald',
+                        ),
+                      ),
                     ],
                   ),
                   Column(
                     children: <Widget>[
                       Icon(Icons.access_time),
                       SizedBox(height: 8.0),
-                      Text('09:00 - 20:00'),
+                      Text(
+                        place.openTime,
+                        style: TextStyle(
+                          fontFamily: 'Oswald',
+                        ),
+                      ),
                     ],
                   ),
                   Column(
                     children: <Widget>[
                       Icon(Icons.monetization_on),
                       SizedBox(height: 8.0),
-                      Text('RP 25000'),
+                      Text(
+                        place.ticketPrice,
+                        style: TextStyle(
+                          fontFamily: 'Oswald',
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -53,14 +284,56 @@ class DetailScreen extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                'Berada di jalur utama Bandung-Lembang, Farm House menjadi objek wisata yang tidak pernah sepi pengunjung. Selain karena letaknya strategis, kawasan ini juga menghadirkan nuansa wisata khas Eropa. Semua itu diterapkan dalam bentuk spot swafoto Instagramable.',
+                place.description,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16.0),
+                style: TextStyle(
+                  fontSize: 16.0,
+                  fontFamily: 'Oswald',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 150,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: place.imageUrls.map((url) {
+                  return Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(url),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class FavoriteButton extends StatefulWidget {
+  @override
+  _FavoriteButtonState createState() => _FavoriteButtonState();
+}
+
+class _FavoriteButtonState extends State<FavoriteButton> {
+  bool isFavorite = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        isFavorite ? Icons.favorite : Icons.favorite_border,
+        color: Colors.red,
+      ),
+      onPressed: () {
+        setState(() {
+          isFavorite = !isFavorite;
+        });
+      },
     );
   }
 }
